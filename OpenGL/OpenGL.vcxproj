@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4A680B88-5E4C-4E22-B33E-D9F88522782A}</ProjectGuid>
+    <ProjectGuid>{20E3CE11-B721-467C-AAFB-7CDFA3DF42EB}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
@@ -36,8 +36,8 @@
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtInstall>5.15.0_msvc2019_64</QtInstall>
+    <QtModules>core;opengl;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -58,11 +58,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Link>
-      <AdditionalLibraryDirectories>C:\Qt\5.15.0\msvc2019_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -90,8 +85,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <QtRcc Include="Lab2_OpenGL.qrc" />
-    <QtUic Include="Lab2_OpenGL.ui" />
+    <QtRcc Include="View.qrc" />
+    <QtUic Include="View.ui" />
     <QtMoc Include="View.h" />
     <ClCompile Include="Data.cpp" />
     <ClCompile Include="View.cpp" />

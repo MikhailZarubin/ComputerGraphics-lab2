@@ -18,7 +18,8 @@ public:
 	int GetHeight() const;
 	int GetWidth() const;
 	int GetDepth() const;
-	short operator[](std:: size_t index) const;
+	short operator[](std::size_t index) const;
 	bool ReadFile(std::string filename);
 };
+
 

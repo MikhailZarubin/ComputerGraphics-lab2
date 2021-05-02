@@ -1,9 +1,9 @@
 #include "View.h"
 
-View::View(QWidget *parent)
-    :QOpenGLWidget(parent), data(), visualization_state(VISUALIZATION_QUADS), layer(0), VBOtexture(),  textureImage ()
+View::View(QWidget* parent)
+    :QOpenGLWidget(parent), data(), visualization_state(VISUALIZATION_QUADS), layer(0), VBOtexture(), textureImage()
 {
-   
+
 }
 void View::LoadData(std::string filename)
 {
@@ -59,7 +59,7 @@ void View::VisualisationQuads()
         for (int x = 0; x < w - 1; x++) {
             glBegin(GL_QUADS);
 
-            c = TransferFunction(data[layer* w * h + y * w + x]);
+            c = TransferFunction(data[layer * w * h + y * w + x]);
             glColor3f(c, c, c);
             glVertex2i(x, y);
 
@@ -81,6 +81,25 @@ void View::VisualisationQuads()
 }
 void View::VisualisationQuadStrip()
 {
+    float c;
+    int w = data.GetWidth();
+    int h = data.GetHeight();
+
+    for (int y = 0; y < h - 1; y++)
+    {
+        glBegin(GL_QUAD_STRIP);
+        for (int x = 0; x < w; x++)
+        {
+            c = TransferFunction(data[layer * w * h + y * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y);
+
+            c = TransferFunction(data[layer * w * h + (y + 1) * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y + 1);
+        }
+        glEnd();
+    }
 }
 void View::VisualisationTexture()
 {
@@ -105,23 +124,23 @@ void View::VisualisationTexture()
 void View::keyPressEvent(QKeyEvent* event)
 {
     unsigned int key_pressed = event->nativeVirtualKey();
-    if (key_pressed == Qt::Key_U || key_pressed == Qt::Key_Up) {
+    if (key_pressed == Qt::Key_W) {
         layer = std::min(layer + 1, data.GetDepth() - 1);
     }
-    else 
-        if (key_pressed == Qt::Key_D || key_pressed == Qt::Key_Down) {
-        layer = std::max(layer - 1, 0);
-    }
-    else if (key_pressed == Qt::Key_N) {
-        switch (visualization_state) {
-        case VISUALIZATION_QUADS:
-            visualization_state = VISUALIZATION_QUADSTRIP; break;
-        case VISUALIZATION_QUADSTRIP:
-            visualization_state = VISUALIZATION_TEXTURE; break;
-        case VISUALIZATION_TEXTURE:
-            visualization_state = VISUALIZATION_QUADS; break;
+    else
+        if (key_pressed == Qt::Key_S) {
+            layer = std::max(layer - 1, 0);
         }
-    }
+        else if (key_pressed == Qt::Key_N) {
+            switch (visualization_state) {
+            case VISUALIZATION_QUADS:
+                visualization_state = VISUALIZATION_QUADSTRIP; break;
+            case VISUALIZATION_QUADSTRIP:
+                visualization_state = VISUALIZATION_TEXTURE; break;
+            case VISUALIZATION_TEXTURE:
+                visualization_state = VISUALIZATION_QUADS; break;
+            }
+        }
 
     update();
 }
