@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lab2_OpenGL", "Lab2_OpenGL.vcxproj", "{4A680B88-5E4C-4E22-B33E-D9F88522782A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A680B88-5E4C-4E22-B33E-D9F88522782A}.Debug|x64.ActiveCfg = Debug|x64
+		{4A680B88-5E4C-4E22-B33E-D9F88522782A}.Debug|x64.Build.0 = Debug|x64
+		{4A680B88-5E4C-4E22-B33E-D9F88522782A}.Release|x64.ActiveCfg = Release|x64
+		{4A680B88-5E4C-4E22-B33E-D9F88522782A}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C57A891B-320B-4E07-A66B-C7E0C2C0B2BF}
+	EndGlobalSection
+EndGlobal
