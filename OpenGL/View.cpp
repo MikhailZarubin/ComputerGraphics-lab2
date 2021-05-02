@@ -165,3 +165,95 @@ void View::genTextureImage()
             textureImage.setPixelColor(x, y, QColor(c, c, c));
         }
 }
+void ViewNewLayer::resizeGL(int width, int depth)
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.f, data.GetWidth() - 1, 0.f, data.GetDepth() - 1, -1.f, 1.f);
+    glViewport(0, 0, width, depth);
+    update();
+}
+void ViewNewLayer::VisualisationQuads()
+{
+    float c;
+    int w = data.GetWidth();
+    int d = data.GetDepth();
+
+    for (int y = 0; y < d - 1; y++) {
+        for (int x = 0; x < w - 1; x++) {
+            glBegin(GL_QUADS);
+
+            c = TransferFunction(data[layer * w * d + y * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y);
+
+            c = TransferFunction(data[layer * w * d + (y + 1) * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y + 1);
+
+            c = TransferFunction(data[layer * w * d + (y + 1) * w + x + 1]);
+            glColor3f(c, c, c);
+            glVertex2i(x + 1, y + 1);
+
+            c = TransferFunction(data[layer * w * d + y * w + x + 1]);
+            glColor3f(c, c, c);
+            glVertex2i(x + 1, y);
+
+            glEnd();
+        }
+    }
+}
+void ViewNewLayer::VisualisationQuadStrip()
+{
+    float c;
+    int w = data.GetWidth();
+    int d = data.GetDepth();
+
+    for (int y = 0; y < d - 1; y++)
+    {
+        glBegin(GL_QUAD_STRIP);
+        for (int x = 0; x < w; x++)
+        {
+            c = TransferFunction(data[layer * w * d + y * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y);
+
+            c = TransferFunction(data[layer * w * d + (y + 1) * w + x]);
+            glColor3f(c, c, c);
+            glVertex2i(x, y + 1);
+        }
+        glEnd();
+    }
+}
+void ViewNewLayer::VisualisationTexture()
+{
+
+    genTextureImage();
+    Load2dTexture();
+
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(0, 0);
+    glTexCoord2f(0, 1);
+    glVertex2i(0, data.GetHeight());
+    glTexCoord2f(1, 1);
+    glVertex2i(data.GetWidth(), data.GetDepth());
+    glTexCoord2f(1, 0);
+    glVertex2i(data.GetWidth(), 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
+void ViewNewLayer::genTextureImage()
+{
+    int w = data.GetWidth();
+    int d = data.GetDepth();
+    textureImage = QImage(w, d, QImage::Format_RGB32);
+    qDebug() << "GEN_TEXTURE";
+    for (int y = 0; y < d; y++)
+        for (int x = 0; x < w; x++)
+        {
+            float c = TransferFunction(data[layer * w *d + w * y + x]) * 255;
+            textureImage.setPixelColor(x, y, QColor(c, c, c));
+        }
+}
