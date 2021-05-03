@@ -1,7 +1,7 @@
 #include "View.h"
 
 View::View(QWidget* parent)
-    :QOpenGLWidget(parent), data(), visualization_state(VISUALIZATION_QUADS), layer(0), VBOtexture(), textureImage()
+    :QOpenGLWidget(parent), data(), visualization_state(VISUALIZATION_QUADS), layer(0), VBOtexture(), textureImage(), cut(x)
 {
 
 }
@@ -43,6 +43,8 @@ void View::paintGL()
         VisualisationTexture();
         break;
     }
+    qDebug() << "min=" << data.GetMin();
+    qDebug() << "max= " << data.GetMax();
 }
 float View::TransferFunction(short value)
 {
@@ -54,53 +56,106 @@ void View::VisualisationQuads()
     float c;
     int w = data.GetWidth();
     int h = data.GetHeight();
+    int d = data.GetDepth();
 
-    for (int y = 0; y < h - 1; y++) {
-        for (int x = 0; x < w - 1; x++) {
-            glBegin(GL_QUADS);
+    if (cut == x)
+    {
+        for (int y = 0; y < h - 1; y++)
+        {
+            for (int x = 0; x < w - 1; x++)
+            {
+                glBegin(GL_QUADS);
+                c = TransferFunction(data[layer * w * h + y * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
 
-            c = TransferFunction(data[layer * w * h + y * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y);
+                c = TransferFunction(data[layer * w * h + (y + 1) * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
 
-            c = TransferFunction(data[layer * w * h + (y + 1) * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y + 1);
+                c = TransferFunction(data[layer * w * h + (y + 1) * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y + 1);
 
-            c = TransferFunction(data[layer * w * h + (y + 1) * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y + 1);
+                c = TransferFunction(data[layer * w * h + y * w + x + 1]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y);
+                glEnd();
+            }
+        }
+    }
+    if (cut == y)
+    {
+        for (int y = 0; y < h - 1; y++)
+        {
+            for (int x = 0; x < w - 1; x++)
+            {
+                glBegin(GL_QUADS);
+                c = TransferFunction(data[layer + y * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
 
-            c = TransferFunction(data[layer * w * h + y * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y);
+                c = TransferFunction(data[layer + (y + 1) * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
 
-            glEnd();
+                c = TransferFunction(data[layer + (y + 1) * d + (x + 1) * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y + 1);
+
+                c = TransferFunction(data[layer + y * d + (x + 1) * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x + 1, y);
+                glEnd();
+            }
         }
     }
 }
+
 void View::VisualisationQuadStrip()
 {
     float c;
     int w = data.GetWidth();
     int h = data.GetHeight();
-
-    for (int y = 0; y < h - 1; y++)
+    int d = data.GetDepth();
+    if (cut == x)
     {
-        glBegin(GL_QUAD_STRIP);
-        for (int x = 0; x < w; x++)
+        for (int y = 0; y < h - 1; y++)
         {
-            c = TransferFunction(data[layer * w * h + y * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y);
+            glBegin(GL_QUAD_STRIP);
+            for (int x = 0; x < w; x++)
+            {
+                c = TransferFunction(data[layer * w * h + y * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
 
-            c = TransferFunction(data[layer * w * h + (y + 1) * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y + 1);
+                c = TransferFunction(data[layer * w * h + (y + 1) * w + x]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
+            }
+            glEnd();
         }
-        glEnd();
+    }
+    if (cut == y)
+    {
+        for (int y = 0; y < h - 1; y++)
+        {
+            glBegin(GL_QUAD_STRIP);
+            for (int x = 0; x < w; x++)
+            {
+                c = TransferFunction(data[layer + y * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y);
+
+                c = TransferFunction(data[layer + (y + 1) * d + x * w * h]);
+                glColor3f(c, c, c);
+                glVertex2i(x, y + 1);
+            }
+            glEnd();
+        }
     }
 }
+
 void View::VisualisationTexture()
 {
 
@@ -121,29 +176,6 @@ void View::VisualisationTexture()
     glDisable(GL_TEXTURE_2D);
 }
 
-void View::keyPressEvent(QKeyEvent* event)
-{
-    unsigned int key_pressed = event->nativeVirtualKey();
-    if (key_pressed == Qt::Key_W) {
-        layer = std::min(layer + 1, data.GetDepth() - 1);
-    }
-    else
-        if (key_pressed == Qt::Key_S) {
-            layer = std::max(layer - 1, 0);
-        }
-        else if (key_pressed == Qt::Key_N) {
-            switch (visualization_state) {
-            case VISUALIZATION_QUADS:
-                visualization_state = VISUALIZATION_QUADSTRIP; break;
-            case VISUALIZATION_QUADSTRIP:
-                visualization_state = VISUALIZATION_TEXTURE; break;
-            case VISUALIZATION_TEXTURE:
-                visualization_state = VISUALIZATION_QUADS; break;
-            }
-        }
-
-    update();
-}
 void View::Load2dTexture()
 {
     glBindTexture(GL_TEXTURE_2D, VBOtexture);
@@ -156,104 +188,77 @@ void View::genTextureImage()
 {
     int w = data.GetWidth();
     int h = data.GetHeight();
+    int d = data.GetDepth();
+
     textureImage = QImage(w, h, QImage::Format_RGB32);
     qDebug() << "GEN_TEXTURE";
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
         {
-            float c = TransferFunction(data[layer * w * h + w * y + x]) * 255;
+            float c;
+            if (cut == x)
+                c = TransferFunction(data[layer * w * h + w * y + x]);
+            if (cut == y)
+                c = TransferFunction(data[layer + y * d + x * w * h]);
+            if (c > 255)
+                c = 255;
+            if (c < 0)
+                c = 0;
             textureImage.setPixelColor(x, y, QColor(c, c, c));
         }
 }
-void ViewNewLayer::resizeGL(int width, int depth)
+
+void View::SetX()
 {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.f, data.GetWidth() - 1, 0.f, data.GetDepth() - 1, -1.f, 1.f);
-    glViewport(0, 0, width, depth);
+    cut = x; 
     update();
 }
-void ViewNewLayer::VisualisationQuads()
+void View::SetY()
 {
-    float c;
-    int w = data.GetWidth();
-    int d = data.GetDepth();
-
-    for (int y = 0; y < d - 1; y++) {
-        for (int x = 0; x < w - 1; x++) {
-            glBegin(GL_QUADS);
-
-            c = TransferFunction(data[layer * w * d + y * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y);
-
-            c = TransferFunction(data[layer * w * d + (y + 1) * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y + 1);
-
-            c = TransferFunction(data[layer * w * d + (y + 1) * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y + 1);
-
-            c = TransferFunction(data[layer * w * d + y * w + x + 1]);
-            glColor3f(c, c, c);
-            glVertex2i(x + 1, y);
-
-            glEnd();
-        }
-    }
+    cut = y;
+    update();
 }
-void ViewNewLayer::VisualisationQuadStrip()
-{
-    float c;
-    int w = data.GetWidth();
-    int d = data.GetDepth();
 
-    for (int y = 0; y < d - 1; y++)
+void View::SetMin(short value)
+{
+    data.SetMin(value);
+    update();
+}
+void View::SetMax(short value)
+{
+    data.SetMax(value);
+    update();
+}
+void View::PressW()
+{
+    layer = std::min(layer + 1, data.GetHeight() - 1);
+    update();
+}
+
+void View::PressS()
+{
+    layer = std::max(layer - 1, 0);
+    update();
+}
+
+void View::PressN()
+{
+    switch (visualization_state)
     {
-        glBegin(GL_QUAD_STRIP);
-        for (int x = 0; x < w; x++)
-        {
-            c = TransferFunction(data[layer * w * d + y * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y);
-
-            c = TransferFunction(data[layer * w * d + (y + 1) * w + x]);
-            glColor3f(c, c, c);
-            glVertex2i(x, y + 1);
-        }
-        glEnd();
+    case VISUALIZATION_QUADS:
+        visualization_state = VISUALIZATION_QUADSTRIP; break;
+    case VISUALIZATION_QUADSTRIP:
+        visualization_state = VISUALIZATION_TEXTURE; break;
+    case VISUALIZATION_TEXTURE:
+        visualization_state = VISUALIZATION_QUADS; break;
     }
+    update();
 }
-void ViewNewLayer::VisualisationTexture()
+short View::getMin()
 {
-
-    genTextureImage();
-    Load2dTexture();
-
-    glEnable(GL_TEXTURE_2D);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0);
-    glVertex2i(0, 0);
-    glTexCoord2f(0, 1);
-    glVertex2i(0, data.GetHeight());
-    glTexCoord2f(1, 1);
-    glVertex2i(data.GetWidth(), data.GetDepth());
-    glTexCoord2f(1, 0);
-    glVertex2i(data.GetWidth(), 0);
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+    return data.GetMin();
 }
-void ViewNewLayer::genTextureImage()
+short View::getMax()
 {
-    int w = data.GetWidth();
-    int d = data.GetDepth();
-    textureImage = QImage(w, d, QImage::Format_RGB32);
-    qDebug() << "GEN_TEXTURE";
-    for (int y = 0; y < d; y++)
-        for (int x = 0; x < w; x++)
-        {
-            float c = TransferFunction(data[layer * w *d + w * y + x]) * 255;
-            textureImage.setPixelColor(x, y, QColor(c, c, c));
-        }
+    return data.GetMax();
 }

@@ -15,6 +15,14 @@ short Data::GetMax()const
 {
 	return max;
 }
+void Data::SetMin(short value)
+{
+	min = value;
+}
+void Data::SetMax(short value)
+{
+	max = value;
+}
 int Data::GetHeight() const
 {
 	return height;
@@ -27,31 +35,29 @@ int Data::GetDepth()const
 {
 	return depth;
 }
-bool Data::ReadFile(std::string filename)
+void Data::ReadFile(std::string filename)
 {
 	std::ifstream ifs(filename, std::ios::binary);
-	if (ifs)
+	ifs.read((char*)&width, sizeof(int));
+	ifs.read((char*)&height, sizeof(int));
+	ifs.read((char*)&depth, sizeof(int));
+	ifs.read((char*)&size_x, sizeof(float));
+	ifs.read((char*)&size_y, sizeof(float));
+	ifs.read((char*)&size_z, sizeof(float));
+	int size = width * height * depth;
+	voxel = new short[size];
+	for (int i = 0; i < size; i++)
 	{
-		ifs.read((char*)&width, sizeof(int));
-		ifs.read((char*)&height, sizeof(int));
-		ifs.read((char*)&depth, sizeof(int));
-		ifs.read((char*)&size_x, sizeof(float));
-		ifs.read((char*)&size_y, sizeof(float));
-		ifs.read((char*)&size_z, sizeof(float));
-		int size = width * height * depth;
-		voxel = std::make_unique<short[]>(size);
-		for (int i = 0; i < size; i++)
-		{
-			ifs.read((char*)&voxel[i], sizeof(short));
-			min = std::min(min, voxel[i]);
-			max = std::max(max, voxel[i]);
-		}
-		return true;
+		ifs.read((char*)&voxel[i], sizeof(short)); //voxel+i
+		min = std::min(min, voxel[i]);
+		max = std::max(max, voxel[i]);
 	}
-	else
-		return false;
 }
-short Data::operator[](std::size_t index) const
+short Data::operator[](int index) const
 {
-	return voxel[index];
+	return voxel[std::min(height*width*depth, index)];
+}
+Data::~Data()
+{
+	delete[] voxel;
 }

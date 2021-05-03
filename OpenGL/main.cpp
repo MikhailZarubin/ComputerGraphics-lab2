@@ -1,18 +1,18 @@
-#include "View.h"
-#include <QtWidgets/QApplication>
+#include <QApplication>
+
+#include "Dialog_window.h"
+
+#pragma comment (lib, "opengl32.lib")
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
-    View w;
-    ViewNewLayer wn;
+    View* v = new View;
     QSurfaceFormat format;
     QSurfaceFormat::setDefaultFormat(format);
-    w.setFormat(format);
-    wn.setFormat(format);
-    w.LoadData("FOURDIX-1.bin");
-    wn.LoadData("FOURDIX-1.bin");
-    w.show();
-    wn.show();
+    v->setFormat(format);
+    v->LoadData("FOURDIX-1.bin");
+    Window window(v);
+    window.show();
     return a.exec();
 }
