@@ -10,7 +10,7 @@ class Data
 	short min, max;
 	int height, width, depth;
 	float size_x, size_y, size_z;
-	short* voxel;
+	std::unique_ptr<short[]>voxel;
 public:
 	Data();
 	short GetMin() const;
@@ -22,7 +22,6 @@ public:
 	void SetMax(short value);
 	short operator[](int index) const;
 	void ReadFile(std::string filename);
-	~Data();
 };
 
 

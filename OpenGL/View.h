@@ -8,13 +8,16 @@
 #include <QtWidgets/QOpenGLWidget>
 #include <QtOpenGL/QGLFunctions>
 
+template<class T1, class T2>
+T1 limit_value(T1 x, T2 a, T2 b);
+
 class View : public QOpenGLWidget
 {
     Q_OBJECT
 private:
     Data data;
     enum { VISUALIZATION_QUADS, VISUALIZATION_QUADSTRIP, VISUALIZATION_TEXTURE } visualization_state;
-    enum { x, y } cut;
+    enum { xy, yz, xz} cut;
     int layer;
     GLuint VBOtexture;
     QImage textureImage;
@@ -30,7 +33,8 @@ private:
 public:
     View(QWidget* parent = Q_NULLPTR);
     void LoadData(std::string filename);
-    int getState() { return visualization_state; }
+    int GetState() { return visualization_state; }
+    int GetLayer() { return layer; }
 public slots:
     void SetMin(short value);
     void SetMax(short value);
@@ -39,10 +43,15 @@ public slots:
     void PressS();
     void PressN();
 
-    void SetX();
-    void SetY();
+    void SetXY();
+    void SetYZ();
+    void SetXZ();
 
-    short getMin();
-    short getMax();
+    short GetMin();
+    short GetMax();
+
+    int GetDataWidth();
+    int GetDataHeight();
+    int GetDataDepth();
 };
 

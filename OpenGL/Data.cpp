@@ -45,7 +45,7 @@ void Data::ReadFile(std::string filename)
 	ifs.read((char*)&size_y, sizeof(float));
 	ifs.read((char*)&size_z, sizeof(float));
 	int size = width * height * depth;
-	voxel = new short[size];
+	voxel = std::make_unique<short[]>(size);
 	for (int i = 0; i < size; i++)
 	{
 		ifs.read((char*)&voxel[i], sizeof(short)); //voxel+i
@@ -55,9 +55,5 @@ void Data::ReadFile(std::string filename)
 }
 short Data::operator[](int index) const
 {
-	return voxel[std::min(height*width*depth, index)];
-}
-Data::~Data()
-{
-	delete[] voxel;
+	return voxel[index];
 }

@@ -1,13 +1,18 @@
-#include "Dialog_window.h"
+#include"Dialog_window.h"
 
 
-
-Window::Window(View* v, QWidget* parent)
+Window::Window(QWidget* parent, const char* input)
     : QWidget(parent)
 {
-    setMinimumSize(1200, 600);
+    setMinimumSize(WIDTH, HEIGHT);
 
-    glWidget = v;
+    glWidget = new View;
+    QSurfaceFormat format;
+    QSurfaceFormat::setDefaultFormat(format);
+    glWidget->setFormat(format);
+    glWidget->LoadData(input);
+
+    document = input;
 
     createControls(tr("Controls"));
 
@@ -16,15 +21,15 @@ Window::Window(View* v, QWidget* parent)
     layout->addWidget(glWidget);
     setLayout(layout);
 
-    setWindowTitle(tr("Sliders"));
+    setWindowTitle(tr("TomogramVisualization"));
 }
-Window::~Window()
-{
-    delete glWidget;
-}
+
 void Window::createControls(const QString& title)
 {
     controlsGroup = new QGroupBox(title);
+
+    documentLabel = new QLabel(tr("Document name:"));
+    documentName = new QLabel(tr(document));
 
     minimumLabel = new QLabel(tr("Minimum value:"));
     maximumLabel = new QLabel(tr("Maximum value:"));
@@ -33,20 +38,35 @@ void Window::createControls(const QString& title)
     modeCurrent = new QLabel(tr("QUADS"));
 
     minimumSpinBox = new QSpinBox;
-    minimumSpinBox->setRange(glWidget->getMin() , glWidget->getMax());
+    minimumSpinBox->setRange(glWidget->GetMin(), glWidget->GetMax());
     minimumSpinBox->setSingleStep(1);
+    minimumSpinBox->setValue(glWidget->GetMin());
 
     maximumSpinBox = new QSpinBox;
-    maximumSpinBox->setRange(glWidget->getMin(), glWidget->getMax());
+    maximumSpinBox->setRange(glWidget->GetMin(), glWidget->GetMax());
     maximumSpinBox->setSingleStep(1);
+    maximumSpinBox->setValue(glWidget->GetMax());
 
-    radio1 = new QRadioButton(tr("X-Cut"));
-    radio2 = new QRadioButton(tr("Y-Cut"));
+    radio1 = new QRadioButton(tr("surface XY"));
+    radio2 = new QRadioButton(tr("surface YZ"));
+    radio3 = new QRadioButton(tr("surface XZ"));
 
     connect(radio1, &QRadioButton::clicked, this, &Window::handleButton);
     connect(radio2, &QRadioButton::clicked, this, &Window::handleButton);
+    connect(radio3, &QRadioButton::clicked, this, &Window::handleButton);
 
     radio1->setChecked(true);
+
+    dimLabel1 = new QLabel(tr("Width:"));
+    dimLabel2 = new QLabel(tr("Height:"));
+    dimLabel3 = new QLabel(tr("Depth:"));
+    dimWidth = new QLabel(tr(std::to_string(glWidget->GetDataWidth()).c_str()));
+    dimHeight = new QLabel(tr(std::to_string(glWidget->GetDataHeight()).c_str()));
+    dimDepth = new QLabel(tr(std::to_string(glWidget->GetDataDepth()).c_str()));
+
+    layerLabel = new QLabel(tr("Current layer:"));
+    layerCurrent = new QLabel(tr(std::to_string(glWidget->GetLayer()).c_str()));
+
 
     connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
         glWidget, &View::SetMin);
@@ -58,15 +78,34 @@ void Window::createControls(const QString& title)
         glWidget, &View::SetMax);
 
     QGridLayout* controlsLayout = new QGridLayout;
-    controlsLayout->addWidget(minimumLabel, 0, 0);
-    controlsLayout->addWidget(maximumLabel, 1, 0);
 
-    controlsLayout->addWidget(minimumSpinBox, 0, 1);
-    controlsLayout->addWidget(maximumSpinBox, 1, 1);
-    controlsLayout->addWidget(radio1, 2, 0);
-    controlsLayout->addWidget(radio2, 2, 1);
-    controlsLayout->addWidget(modeLabel, 3, 0);
-    controlsLayout->addWidget(modeCurrent, 3, 1);
+    controlsLayout->addWidget(documentLabel, 0, 0);
+    controlsLayout->addWidget(documentName, 0, 1);
+
+    controlsLayout->addWidget(minimumLabel, 1, 0);
+    controlsLayout->addWidget(minimumSpinBox, 1, 1);
+
+    controlsLayout->addWidget(maximumLabel, 2, 0);
+    controlsLayout->addWidget(maximumSpinBox, 2, 1);
+
+    controlsLayout->addWidget(radio1, 3, 0);
+    controlsLayout->addWidget(radio2, 3, 1);
+    controlsLayout->addWidget(radio3, 3, 2);
+
+    controlsLayout->addWidget(modeLabel, 4, 0);
+    controlsLayout->addWidget(modeCurrent, 4, 1);
+
+    controlsLayout->addWidget(dimLabel1, 5, 0);
+    controlsLayout->addWidget(dimWidth, 5, 1);
+
+    controlsLayout->addWidget(dimLabel2, 6, 0);
+    controlsLayout->addWidget(dimHeight, 6, 1);
+
+    controlsLayout->addWidget(dimLabel3, 7, 0);
+    controlsLayout->addWidget(dimDepth, 7, 1);
+
+    controlsLayout->addWidget(layerLabel, 8, 0);
+    controlsLayout->addWidget(layerCurrent, 8, 1);
 
     controlsGroup->setLayout(controlsLayout);
 }
@@ -75,36 +114,46 @@ void Window::handleButton()
 {
     if (radio1->isChecked())
     {
-        qDebug() << "SET X";
-        glWidget->SetX();
+        qDebug() << "SET XY";
+        glWidget->SetXY();
+        layerCurrent->setText(std::to_string(glWidget->GetLayer()).c_str());
     }
     if (radio2->isChecked())
     {
-        qDebug() << "SET Y";
-        glWidget->SetY();
+        qDebug() << "SET YZ";
+        glWidget->SetYZ();
+        layerCurrent->setText(std::to_string(glWidget->GetLayer()).c_str());
+    }
+    if(radio3->isChecked())
+    {
+        qDebug() << "SET XZ";
+        glWidget->SetXZ();
+        layerCurrent->setText(std::to_string(glWidget->GetLayer()).c_str());
     }
 }
 
 void Window::keyPressEvent(QKeyEvent* event)
 {
-    unsigned int key_pressed = event->nativeVirtualKey();
+    quint32 key_pressed = event->nativeVirtualKey();
     qDebug() << "PRESSED";
 
     if (key_pressed == Qt::Key_W)
     {
         glWidget->PressW();
+        layerCurrent->setText(std::to_string(glWidget->GetLayer()).c_str());
     }
     else if (key_pressed == Qt::Key_S)
     {
         glWidget->PressS();
+        layerCurrent->setText(std::to_string(glWidget->GetLayer()).c_str());
     }
     else if (key_pressed == Qt::Key_N)
     {
         glWidget->PressN();
 
-        qDebug() << "STATE: " << glWidget->getState();
+        qDebug() << "STATE: " << glWidget->GetState();
 
-        switch (glWidget->getState())
+        switch (glWidget->GetState())
         {
         case 0:
             modeCurrent->setText("QUADS");
