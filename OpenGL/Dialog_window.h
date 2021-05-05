@@ -36,12 +36,14 @@ private:
 
     const char* document;
 
-    View* glWidget;
+     View* glWidget;
 
     QGroupBox* controlsGroup;
 
     QLabel* documentLabel;
     QLabel* documentName;
+
+    QHBoxLayout* layout;
 
     QLabel* minimumLabel;
     QLabel* maximumLabel;
@@ -64,8 +66,7 @@ private:
 
     QLabel* layerLabel;
     QLabel* layerCurrent;
-
-    QLabel* controls;
+    QGridLayout* controlsLayout;
 
 private slots:
     void handleButton();

@@ -22,7 +22,7 @@ void View::LoadData(std::string filename)
 }
 void View::initializeGL()
 {
-    glClearColor(0, 0, 0, 0);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glShadeModel(GL_SMOOTH);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -34,10 +34,23 @@ void View::resizeGL(int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     int w = 0, h = 0;
-    w = data.GetWidth() - 1;
-    h = data.GetHeight() - 1;
+    if (cut == xy)
+    {
+        w = data.GetWidth() - 1;
+        h = data.GetHeight() - 1;
+    }
+    else if (cut == yz)
+    {
+        w = data.GetHeight() - 1;
+        h = data.GetDepth() - 1;
+    }
+    else
+    {
+        w = data.GetWidth() - 1;
+        h = data.GetDepth() - 1;
+    }
     glOrtho(0.f, w, 0.f, h, -1.f, 1.f);
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
     update();
 }
 void View::paintGL()
@@ -310,18 +323,28 @@ void View::genTextureImage()
 
 void View::SetXY()
 {
+    layer = std::min(layer, data.GetDepth()-1);
     cut = xy; 
-    update();
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    resizeGL(data.GetWidth(), data.GetHeight());
+   //update();
 }
 void View::SetYZ()
 {
+    layer = std::min(layer, data.GetWidth()-1);
     cut = yz;
-    update();
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    resizeGL(data.GetHeight(), data.GetDepth());
+    //update();
+
 }
 void View::SetXZ()
 {
+    layer = std::min(layer, data.GetHeight()-1);
     cut = xz;
-    update();
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    resizeGL(data.GetWidth(), data.GetDepth());
+    //update();
 }
 
 void View::SetMin(short value)

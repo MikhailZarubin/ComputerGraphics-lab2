@@ -4,19 +4,41 @@
 Window::Window(QWidget* parent, const char* input)
     : QWidget(parent)
 {
+    glWidget = new View;
+    layout = new QHBoxLayout;
+    controlsGroup = new QGroupBox;
+    documentLabel = new QLabel;
+    documentName = new QLabel;
+    minimumLabel = new QLabel;
+    maximumLabel = new QLabel;
+    modeLabel = new QLabel;
+    modeCurrent = new QLabel;
+    minimumSpinBox = new QSpinBox;
+    maximumSpinBox = new QSpinBox;
+    radio1 = new QRadioButton;
+    radio2 = new QRadioButton;
+    radio3 = new QRadioButton;
+    dimLabel1 = new QLabel;
+    dimLabel2 = new QLabel;
+    dimLabel3 = new QLabel;
+    dimWidth = new QLabel;
+    dimHeight = new QLabel;
+    dimDepth = new QLabel;
+    layerLabel = new QLabel;
+    layerCurrent = new QLabel;
+    controlsLayout = new QGridLayout;
+
     setMinimumSize(WIDTH, HEIGHT);
 
-    glWidget = new View;
     QSurfaceFormat format;
     QSurfaceFormat::setDefaultFormat(format);
     glWidget->setFormat(format);
-    glWidget->LoadData(input);
 
+    glWidget->LoadData(input);
     document = input;
 
     createControls(tr("Controls"));
 
-    QHBoxLayout* layout = new QHBoxLayout;
     layout->addWidget(controlsGroup);
     layout->addWidget(glWidget);
     setLayout(layout);
@@ -26,30 +48,28 @@ Window::Window(QWidget* parent, const char* input)
 
 void Window::createControls(const QString& title)
 {
-    controlsGroup = new QGroupBox(title);
+    controlsGroup->setTitle(title);
 
-    documentLabel = new QLabel(tr("Document name:"));
-    documentName = new QLabel(tr(document));
+    documentLabel->setText(tr("Document name:"));
+    documentName->setText(tr(document));
 
-    minimumLabel = new QLabel(tr("Minimum value:"));
-    maximumLabel = new QLabel(tr("Maximum value:"));
+    minimumLabel->setText(tr("Minimum value:"));
+    maximumLabel->setText(tr("Maximum value:"));
 
-    modeLabel = new QLabel(tr("Visualisation mode:"));
-    modeCurrent = new QLabel(tr("QUADS"));
+    modeLabel->setText(tr("Visualisation mode:"));
+    modeCurrent->setText(tr("QUADS"));
 
-    minimumSpinBox = new QSpinBox;
     minimumSpinBox->setRange(glWidget->GetMin(), glWidget->GetMax());
     minimumSpinBox->setSingleStep(1);
     minimumSpinBox->setValue(glWidget->GetMin());
 
-    maximumSpinBox = new QSpinBox;
     maximumSpinBox->setRange(glWidget->GetMin(), glWidget->GetMax());
     maximumSpinBox->setSingleStep(1);
     maximumSpinBox->setValue(glWidget->GetMax());
 
-    radio1 = new QRadioButton(tr("surface XY"));
-    radio2 = new QRadioButton(tr("surface YZ"));
-    radio3 = new QRadioButton(tr("surface XZ"));
+    radio1->setText(tr("surface XY"));
+    radio2->setText(tr("surface YZ"));
+    radio3->setText(tr("surface XZ"));
 
     connect(radio1, &QRadioButton::clicked, this, &Window::handleButton);
     connect(radio2, &QRadioButton::clicked, this, &Window::handleButton);
@@ -57,27 +77,22 @@ void Window::createControls(const QString& title)
 
     radio1->setChecked(true);
 
-    dimLabel1 = new QLabel(tr("Width:"));
-    dimLabel2 = new QLabel(tr("Height:"));
-    dimLabel3 = new QLabel(tr("Depth:"));
-    dimWidth = new QLabel(tr(std::to_string(glWidget->GetDataWidth()).c_str()));
-    dimHeight = new QLabel(tr(std::to_string(glWidget->GetDataHeight()).c_str()));
-    dimDepth = new QLabel(tr(std::to_string(glWidget->GetDataDepth()).c_str()));
+    dimLabel1->setText(tr("Width:"));
+    dimLabel2->setText(tr("Height:"));
+    dimLabel3->setText(tr("Depth:"));
+    dimWidth->setText(tr(std::to_string(glWidget->GetDataWidth()).c_str()));
+    dimHeight->setText(tr(std::to_string(glWidget->GetDataHeight()).c_str()));
+    dimDepth->setText(tr(std::to_string(glWidget->GetDataDepth()).c_str()));
 
-    layerLabel = new QLabel(tr("Current layer:"));
-    layerCurrent = new QLabel(tr(std::to_string(glWidget->GetLayer()).c_str()));
+    layerLabel->setText(tr("Current layer:"));
+    layerCurrent->setText(tr(std::to_string(glWidget->GetLayer()).c_str()));
 
 
     connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
         glWidget, &View::SetMin);
-    connect(minimumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
-        glWidget, &View::SetMin);
-    connect(maximumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
-        glWidget, &View::SetMax);
     connect(maximumSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
         glWidget, &View::SetMax);
 
-    QGridLayout* controlsLayout = new QGridLayout;
 
     controlsLayout->addWidget(documentLabel, 0, 0);
     controlsLayout->addWidget(documentName, 0, 1);
@@ -134,7 +149,7 @@ void Window::handleButton()
 
 void Window::keyPressEvent(QKeyEvent* event)
 {
-    quint32 key_pressed = event->nativeVirtualKey();
+    unsigned int key_pressed = event->nativeVirtualKey();
     qDebug() << "PRESSED";
 
     if (key_pressed == Qt::Key_W)

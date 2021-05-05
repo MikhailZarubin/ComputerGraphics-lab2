@@ -14,7 +14,7 @@ T1 limit_value(T1 x, T2 a, T2 b);
 class View : public QOpenGLWidget
 {
     Q_OBJECT
-private:
+protected:
     Data data;
     enum { VISUALIZATION_QUADS, VISUALIZATION_QUADSTRIP, VISUALIZATION_TEXTURE } visualization_state;
     enum { xy, yz, xz} cut;
@@ -54,4 +54,5 @@ public slots:
     int GetDataHeight();
     int GetDataDepth();
 };
+
 
