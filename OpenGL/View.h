@@ -55,4 +55,3 @@ public slots:
     int GetDataDepth();
 };
 
-
